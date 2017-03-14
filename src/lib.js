@@ -165,6 +165,7 @@ export default class Migrator {
         this.log('There are no migrations to run'.yellow);
         this.log(`Current Migrations' Statuses: `);
         await this.list();
+        return []
       }
       throw new Error('There are no migrations to run');
     }
