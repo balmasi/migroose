@@ -21,11 +21,19 @@
     "db",
     "nosql"
   ],
-  "author": "Ahrnee <ahrndee@gmail.com>",
+  "author": "Santiago Quinteros <santiago@whyline.com>",
+  "contributors": [{
+     "name": "Santiago Quinteros",
+     "email": "santiago@whyline.com",
+     "url": "https://github.com/santiq"
+  },{
+     "name": "ahrnee",
+     "url": "https://github.com/ahrnee"
+  }],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ahrnee/migrate-mongoose"
+    "url": "https://github.com/whyline/migrate-mongoose.git"
   },
   "dependencies": {
     "bluebird": "^3.5.1",
