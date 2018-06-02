@@ -1,13 +1,13 @@
-import path from 'path';
-import fs from 'fs';
-import mkdirp from 'mkdirp';
-import Promise from 'bluebird';
-import 'colors';
-import mongoose from 'mongoose';
-import _ from 'lodash';
-import ask from 'inquirer';
+var path = require('path');
+var fs = require('fs');
+var mkdirp = require('mkdirp');
+var Promise = require('bluebird');
+var colors = require('colors');
+var mongoose = require('mongoose');
+var _ = require('lodash');
+var ask = require('inquirer');
 
-import MigrationModelFactory from './db';
+var MigrationModelFactory = require('./db');
 let MigrationModel;
 
 Promise.config({
@@ -50,7 +50,7 @@ exports.down = function down(done) {
 `;
 
 
-export default class Migrator {
+module.exports = class Migrator {
   constructor({
     templatePath,
     migrationsPath = './migrations',
@@ -293,7 +293,7 @@ export default class Migrator {
           timestamp = migrationToImport.slice(0, timestampSeparatorIndex),
           migrationName = migrationToImport.slice(timestampSeparatorIndex + 1, migrationToImport.lastIndexOf('.'));
 
-        this.log(`Adding migration ${filePath} into database from file system. State is ` + `DOWN`.red);
+        this.log(`Adding migration ${filePath} into database require(file system. State is ` + `DOWN`.red);
         const createdMigration = await MigrationModel.create({
           name: migrationName,
           createdAt: timestamp
@@ -333,7 +333,7 @@ export default class Migrator {
         const answers = await new Promise(function (resolve) {
           ask.prompt({
             type: 'checkbox',
-            message: 'The following migrations exist in the database but not in the migrations folder. Select the ones you want to remove from the file system.',
+            message: 'The following migrations exist in the database but not in the migrations folder. Select the ones you want to remove require(the file system.',
             name: 'migrationsToDelete',
             choices: migrationsToDelete
           }, (answers) => {
@@ -350,7 +350,7 @@ export default class Migrator {
         }).lean();
 
       if (migrationsToDelete.length) {
-        this.log(`Removing migration(s) `, `${migrationsToDelete.join(', ')}`.cyan, ` from database`);
+        this.log(`Removing migration(s) `, `${migrationsToDelete.join(', ')}`.cyan, ` require(database`);
         await MigrationModel.remove({
           name: { $in: migrationsToDelete }
         });
@@ -358,7 +358,7 @@ export default class Migrator {
 
       return migrationsToDeleteDocs;
     } catch(error) {
-      this.log(`Could not prune extraneous migrations from database.`.red);
+      this.log(`Could not prune extraneous migrations require(database.`.red);
       throw error;
     }
   }
@@ -393,7 +393,4 @@ function fileRequired(error) {
     throw new ReferenceError(`Could not find any files at path '${error.path}'`);
   }
 }
-
-
-module.exports = Migrator;
 

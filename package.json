@@ -2,15 +2,13 @@
   "name": "migrate-mongoose-typescript",
   "version": "3.3.2",
   "description": "A mongoose based migration framework for node with Typescript support",
-  "main": "./dist/lib.js",
+  "main": "./src/lib.js",
   "scripts": {
-    "prepublish": "scripts/prepublish.sh",
-    "postpublish": "rm -r ./dist",
     "postversion": "git push && git push --tags",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "migrate": "./dist/cli.js"
+    "migrate": "./src/cli.js"
   },
   "keywords": [
     "migrate",
@@ -30,12 +28,6 @@
     "url": "https://github.com/ahrnee/migrate-mongoose"
   },
   "dependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-latest": "^6.24.1",
-    "babel-register": "^6.26.0",
     "bluebird": "^3.5.1",
     "colors": "^1.2.4",
     "dotenv": "^5.0.1",

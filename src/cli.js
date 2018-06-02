@@ -1,11 +1,11 @@
 #! /usr/bin/env node
 
-import path from 'path';
-import yargs from 'yargs';
-import 'colors';
-import dotenv from 'dotenv';
+var path = require('path');
+var yargs = require('yargs');
+var colors = require('colors');
+var dotenv = require('dotenv');
 
-import Migrator from './lib';
+var Migrator = require('./lib');
 
 dotenv.config();
 let  { argv: args } = yargs
