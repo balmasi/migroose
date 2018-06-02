@@ -4,10 +4,21 @@ var path = require('path');
 var yargs = require('yargs');
 var colors = require('colors');
 var dotenv = require('dotenv');
+var isPathGlobal = require('is-path-global');
 
 var Migrator = require('./lib');
 
+//get Env Variables from .env file
 dotenv.config();
+
+//set scriptname from CLI, to avoid strange paths when installed globally
+let scriptName = process.argv[1];
+if (isPathGlobal(scriptName)) {
+  scriptName = path.basename(scriptName);
+} else {
+  scriptName = '$0';
+}
+
 let  { argv: args } = yargs
   .usage("Usage: migrate -d <mongo-uri> [[create|up|down <migration-name>]|list] [optional options]")
   .demand(1)
@@ -35,21 +46,21 @@ let  { argv: args } = yargs
   )
 
   .command('list'.cyan, 'Lists all migrations and their current state.')
-  .example('$0 list')
+  .example(`${scriptName} list`)
 
   .command('create <migration-name>'.cyan, 'Creates a new migration file.')
-  .example('$0 create add_users')
+  .example(`${scriptName} create add_users`)
 
   .command('up [migration-name]'.cyan,
     'Migrates all the migration files that have not yet been run in chronological order. ' +
     'Not including [migration-name] will run UP on all migrations that are in a DOWN state.')
-  .example('$0 up add_user')
+  .example(`${scriptName} up add_user`)
 
   .command('down <migration-name>'.cyan, 'Rolls back migrations down to given name (if down function was provided)')
-  .example('$0 down delete_names')
+  .example(`${scriptName} down delete_names`)
 
   .command('prune'.cyan, 'Allows you to delete extraneous migrations by removing extraneous local migration files/database migrations.')
-  .example('$0 prune')
+  .example(`${scriptName} prune`)
   .option('collection', {
     type: 'string',
     default: 'migrations',

@@ -22,14 +22,17 @@
     "nosql"
   ],
   "author": "Santiago Quinteros <santiago@whyline.com>",
-  "contributors": [{
-     "name": "Santiago Quinteros",
-     "email": "santiago@whyline.com",
-     "url": "https://github.com/santiq"
-  },{
-     "name": "ahrnee",
-     "url": "https://github.com/ahrnee"
-  }],
+  "contributors": [
+    {
+      "name": "Santiago Quinteros",
+      "email": "santiago@whyline.com",
+      "url": "https://github.com/santiq"
+    },
+    {
+      "name": "ahrnee",
+      "url": "https://github.com/ahrnee"
+    }
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -40,6 +43,7 @@
     "colors": "^1.2.4",
     "dotenv": "^5.0.1",
     "inquirer": "^0.12.0",
+    "is-path-global": "^2.0.0",
     "mkdirp": "^0.5.1",
     "mongoose": "^4.13.12",
     "ts-node": "^6.0.3",
