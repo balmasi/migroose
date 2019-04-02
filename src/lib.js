@@ -1,13 +1,13 @@
-import path from 'path';
-import fs from 'fs';
-import mkdirp from 'mkdirp';
-import Promise from 'bluebird';
-import 'colors';
-import mongoose from 'mongoose';
-import _ from 'lodash';
-import ask from 'inquirer';
+var path = require('path');
+var fs = require('fs');
+var mkdirp = require('mkdirp');
+var Promise = require('bluebird');
+var colors = require('colors');
+var mongoose = require('mongoose');
+var _ = require('lodash');
+var ask = require('inquirer');
 
-import MigrationModelFactory from './db';
+var MigrationModelFactory = require('./db');
 let MigrationModel;
 
 Promise.config({
@@ -50,26 +50,28 @@ exports.down = function down(done) {
 `;
 
 
-export default class Migrator {
+module.exports = class Migrator {
   constructor({
     templatePath,
     migrationsPath = './migrations',
     dbConnectionUri,
     es6Templates = false,
+    typescript = false,
     collectionName = 'migrations',
     autosync = false,
     cli = false,
     connection
   }) {
-    const defaultTemplate = es6Templates ?  es6Template : es5Template;
+    const defaultTemplate = typescript || es6Templates ?  es6Template : es5Template;
     this.template = templatePath ? fs.readFileSync(templatePath, 'utf-8') : defaultTemplate;
     this.migrationPath = path.resolve(migrationsPath);
     this.connection = connection || mongoose.createConnection(dbConnectionUri);
     this.es6 = es6Templates;
+    this.typescript = typescript;
     this.collection = collectionName;
     this.autosync = autosync;
     this.cli = cli;
-    MigrationModel = MigrationModelFactory(collectionName, this.connection);
+    MigrationModel = MigrationModelFactory(collectionName, this.connection, {typescript});
   }
 
   log (logString, force = false) {
@@ -95,6 +97,18 @@ export default class Migrator {
   }
 
   /**
+   * Generate name for migration file with right extension
+   * @param basename
+   * @return {string}
+   */
+  getMigrationFileName(basename) {
+    if (this.typescript) {
+      return `${basename}.ts`
+    };
+    return `${basename}.js`;
+  }
+
+  /**
    * Create a new migration
    * @param {string} migrationName
    * @returns {Promise<Object>} A promise of the Migration created
@@ -108,7 +122,7 @@ export default class Migrator {
 
       await this.sync();
       const now = Date.now();
-      const newMigrationFile = `${now}-${migrationName}.js`;
+      const newMigrationFile = this.getMigrationFileName(`${now}-${migrationName}`);
       mkdirp.sync(this.migrationPath);
       fs.writeFileSync(path.join(this.migrationPath, newMigrationFile), this.template);
       // create instance in db
@@ -184,6 +198,13 @@ export default class Migrator {
         require('babel-polyfill');
       }
 
+      if (this.typescript) {
+        require("ts-node").register({
+          disableWarnings: true,
+          transpileOnly: true
+        });
+      }
+
       let migrationFunctions;
 
       try {
@@ -241,7 +262,7 @@ export default class Migrator {
       const filesInMigrationFolder = fs.readdirSync(this.migrationPath);
       const migrationsInDatabase = await MigrationModel.find({});
       // Go over migrations in folder and delete any files not in DB
-      const migrationsInFolder = _.filter(filesInMigrationFolder, file => /\d{13,}\-.+.js$/.test(file))
+      const migrationsInFolder = _.filter(filesInMigrationFolder, file => /\d{13,}\-.+.(js|ts)$/.test(file))
         .map(filename => {
           const fileCreatedAt = parseInt(filename.split('-')[0]);
           const existsInDatabase = migrationsInDatabase.some(m => filename == m.filename);
@@ -272,7 +293,7 @@ export default class Migrator {
           timestamp = migrationToImport.slice(0, timestampSeparatorIndex),
           migrationName = migrationToImport.slice(timestampSeparatorIndex + 1, migrationToImport.lastIndexOf('.'));
 
-        this.log(`Adding migration ${filePath} into database from file system. State is ` + `DOWN`.red);
+        this.log(`Adding migration ${filePath} into database require(file system. State is ` + `DOWN`.red);
         const createdMigration = await MigrationModel.create({
           name: migrationName,
           createdAt: timestamp
@@ -294,7 +315,7 @@ export default class Migrator {
       const filesInMigrationFolder = fs.readdirSync(this.migrationPath);
       const migrationsInDatabase = await MigrationModel.find({});
       // Go over migrations in folder and delete any files not in DB
-      const migrationsInFolder = _.filter(filesInMigrationFolder, file => /\d{13,}\-.+.js/.test(file) )
+      const migrationsInFolder = _.filter(filesInMigrationFolder, file => /\d{13,}\-.+.(js|ts)/.test(file) )
         .map(filename => {
           const fileCreatedAt = parseInt(filename.split('-')[0]);
           const existsInDatabase = migrationsInDatabase.some(m => filename == m.filename);
@@ -312,7 +333,7 @@ export default class Migrator {
         const answers = await new Promise(function (resolve) {
           ask.prompt({
             type: 'checkbox',
-            message: 'The following migrations exist in the database but not in the migrations folder. Select the ones you want to remove from the file system.',
+            message: 'The following migrations exist in the database but not in the migrations folder. Select the ones you want to remove require(the file system.',
             name: 'migrationsToDelete',
             choices: migrationsToDelete
           }, (answers) => {
@@ -329,7 +350,7 @@ export default class Migrator {
         }).lean();
 
       if (migrationsToDelete.length) {
-        this.log(`Removing migration(s) `, `${migrationsToDelete.join(', ')}`.cyan, ` from database`);
+        this.log(`Removing migration(s) `, `${migrationsToDelete.join(', ')}`.cyan, ` require(database`);
         await MigrationModel.remove({
           name: { $in: migrationsToDelete }
         });
@@ -337,7 +358,7 @@ export default class Migrator {
 
       return migrationsToDeleteDocs;
     } catch(error) {
-      this.log(`Could not prune extraneous migrations from database.`.red);
+      this.log(`Could not prune extraneous migrations require(database.`.red);
       throw error;
     }
   }
@@ -365,14 +386,8 @@ export default class Migrator {
   }
 }
 
-
-
 function fileRequired(error) {
   if (error && error.code == 'ENOENT') {
     throw new ReferenceError(`Could not find any files at path '${error.path}'`);
   }
 }
-
-
-module.exports = Migrator;
-

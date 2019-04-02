@@ -1,11 +1,13 @@
 #! /usr/bin/env node
 
-import path from 'path';
-import yargs from 'yargs';
-import 'colors';
+var path = require('path');
+var yargs = require('yargs');
+var colors = require('colors');
+var dotenv = require('dotenv');
 
-import Migrator from './lib';
+var Migrator = require('./lib');
 
+dotenv.config();
 let  { argv: args } = yargs
   .usage("Usage: migrate -d <mongo-uri> [[create|up|down <migration-name>]|list] [optional options]")
   .demand(1)
@@ -65,6 +67,10 @@ let  { argv: args } = yargs
     type: 'boolean',
     description: 'use es6 migration template?'
   })
+  .option('typescript', {
+    type: 'boolean',
+    description: 'use typescript migration template?'
+  })
   .option('md', {
     alias: 'migrations-dir',
     description: 'The path to the migration files',
@@ -115,6 +121,7 @@ let migrator = new Migrator({
   templatePath: args['template-file'],
   dbConnectionUri: args.dbConnectionUri,
   es6Templates: args.es6,
+  typescript: args.typescript,
   collectionName:  args.collection,
   autosync: args.autosync,
   cli: true
@@ -169,8 +176,6 @@ promise
     console.warn(err.message.yellow);
     process.exit(1);
   });
-
-
 
 function validateSubArgs({ min = 0, max = Infinity, desc }) {
   const argsLen = args._.length - 1;
