@@ -1,7 +1,7 @@
 {
-  "name": "migrate-mongoose-typescript",
-  "version": "3.3.2",
-  "description": "A mongoose based migration framework for node with Typescript support",
+  "name": "migrate-mongoose",
+  "version": "3.3.3",
+  "description": "A mongoose based migration framework for node",
   "main": "./src/lib.js",
   "scripts": {
     "postversion": "git push && git push --tags",
@@ -21,11 +21,11 @@
     "db",
     "nosql"
   ],
-  "author": "Ahrnee <ahrndee@gmail.com>",
+  "author": "Nogueira <andersonlunog@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ahrnee/migrate-mongoose"
+    "url": "https://github.com/andersonlunog/migrate-mongoose"
   },
   "dependencies": {
     "bluebird": "^3.5.1",
@@ -33,7 +33,7 @@
     "dotenv": "^5.0.1",
     "inquirer": "^0.12.0",
     "mkdirp": "^0.5.1",
-    "mongoose": "^4.13.12",
+    "mongoose": "^5.4.21",
     "ts-node": "^6.0.3",
     "yargs": "^4.8.1"
   }

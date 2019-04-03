@@ -65,7 +65,7 @@ module.exports = class Migrator {
     const defaultTemplate = typescript || es6Templates ?  es6Template : es5Template;
     this.template = templatePath ? fs.readFileSync(templatePath, 'utf-8') : defaultTemplate;
     this.migrationPath = path.resolve(migrationsPath);
-    this.connection = connection || mongoose.createConnection(dbConnectionUri);
+    this.connection = connection || mongoose.createConnection(dbConnectionUri, { useNewUrlParser: true });
     this.es6 = es6Templates;
     this.typescript = typescript;
     this.collection = collectionName;
@@ -237,7 +237,7 @@ module.exports = class Migrator {
 
         this.log(`${direction.toUpperCase()}:   `[direction == 'up'? 'green' : 'red'] + ` ${migration.filename} `);
 
-        await MigrationModel.where({name: migration.name}).update({$set: {state: direction}});
+        await MigrationModel.where({name: migration.name}).updateMany({$set: {state: direction}});
         migrationsRan.push(migration.toJSON());
         numMigrationsRan++;
       } catch(err) {
@@ -351,7 +351,7 @@ module.exports = class Migrator {
 
       if (migrationsToDelete.length) {
         this.log(`Removing migration(s) `, `${migrationsToDelete.join(', ')}`.cyan, ` require(database`);
-        await MigrationModel.remove({
+        await MigrationModel.deleteMany({
           name: { $in: migrationsToDelete }
         });
       }
