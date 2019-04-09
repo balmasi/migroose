@@ -148,9 +148,13 @@ module.exports = class Migrator {
   async run(direction = 'up', migrationName) {
     await this.sync();
 
+    if (direction !== 'up' && direction !== 'down') {
+      throw new Error(`The '${direction}' is not supported, use the 'up' or 'down' direction`);
+    }
+
     const untilMigration = migrationName ?
       await MigrationModel.findOne({name: migrationName}) :
-      await MigrationModel.findOne().sort({createdAt: -1});
+      await MigrationModel.findOne().sort({createdAt: direction === 'up' ? -1 : 1});
 
     if (!untilMigration) {
       if (migrationName) throw new ReferenceError("Could not find that migration in the database");
