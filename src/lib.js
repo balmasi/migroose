@@ -297,7 +297,7 @@ module.exports = class Migrator {
           timestamp = migrationToImport.slice(0, timestampSeparatorIndex),
           migrationName = migrationToImport.slice(timestampSeparatorIndex + 1, migrationToImport.lastIndexOf('.'));
 
-        this.log(`Adding migration ${filePath} into database require(file system. State is ` + `DOWN`.red);
+        this.log(`Adding migration ${filePath} into database from file system. State is ` + `DOWN`.red);
         const createdMigration = await MigrationModel.create({
           name: migrationName,
           createdAt: timestamp
@@ -337,7 +337,7 @@ module.exports = class Migrator {
         const answers = await new Promise(function (resolve) {
           ask.prompt({
             type: 'checkbox',
-            message: 'The following migrations exist in the database but not in the migrations folder. Select the ones you want to remove require(the file system.',
+            message: 'The following migrations exist in the database but not in the migrations folder. Select the ones you want to remove from the file system.',
             name: 'migrationsToDelete',
             choices: migrationsToDelete
           }, (answers) => {
@@ -354,7 +354,7 @@ module.exports = class Migrator {
         }).lean();
 
       if (migrationsToDelete.length) {
-        this.log(`Removing migration(s) `, `${migrationsToDelete.join(', ')}`.cyan, ` require(database`);
+        this.log(`Removing migration(s) `, `${migrationsToDelete.join(', ')}`.cyan, ` from database`);
         await MigrationModel.deleteMany({
           name: { $in: migrationsToDelete }
         });
@@ -362,7 +362,7 @@ module.exports = class Migrator {
 
       return migrationsToDeleteDocs;
     } catch(error) {
-      this.log(`Could not prune extraneous migrations require(database.`.red);
+      this.log(`Could not prune extraneous migrations from database.`.red);
       throw error;
     }
   }
