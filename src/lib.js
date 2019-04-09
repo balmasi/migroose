@@ -56,20 +56,22 @@ export default class Migrator {
     migrationsPath = './migrations',
     dbConnectionUri,
     es6Templates = false,
+    typescript = false,
     collectionName = 'migrations',
     autosync = false,
     cli = false,
     connection
   }) {
-    const defaultTemplate = es6Templates ?  es6Template : es5Template;
+    const defaultTemplate = typescript || es6Templates ?  es6Template : es5Template;
     this.template = templatePath ? fs.readFileSync(templatePath, 'utf-8') : defaultTemplate;
     this.migrationPath = path.resolve(migrationsPath);
     this.connection = connection || mongoose.createConnection(dbConnectionUri);
     this.es6 = es6Templates;
+    this.typescript = typescript;
     this.collection = collectionName;
     this.autosync = autosync;
     this.cli = cli;
-    MigrationModel = MigrationModelFactory(collectionName, this.connection);
+    MigrationModel = MigrationModelFactory(collectionName, this.connection, {typescript});
   }
 
   log (logString, force = false) {
@@ -95,6 +97,17 @@ export default class Migrator {
   }
 
   /**
+   * Generate name for migration file with right extension
+   * @param basename
+   * @return {string}
+   */
+	getMigrationFileName(basename) {
+		if (this.typescript) return `${basename}.ts`;
+		return `${basename}.js`;
+	}
+
+
+  /**
    * Create a new migration
    * @param {string} migrationName
    * @returns {Promise<Object>} A promise of the Migration created
@@ -108,7 +121,7 @@ export default class Migrator {
 
       await this.sync();
       const now = Date.now();
-      const newMigrationFile = `${now}-${migrationName}.js`;
+      const newMigrationFile = this.getMigrationFileName(`${now}-${migrationName}`);
       mkdirp.sync(this.migrationPath);
       fs.writeFileSync(path.join(this.migrationPath, newMigrationFile), this.template);
       // create instance in db
@@ -188,6 +201,12 @@ export default class Migrator {
         require('babel-polyfill');
       }
 
+      if (this.typescript) {
+      	require("ts-node").register({
+      	 disableWarnings: true
+      	});
+      }
+
       let migrationFunctions;
 
       try {
@@ -245,7 +264,7 @@ export default class Migrator {
       const filesInMigrationFolder = fs.readdirSync(this.migrationPath);
       const migrationsInDatabase = await MigrationModel.find({});
       // Go over migrations in folder and delete any files not in DB
-      const migrationsInFolder = _.filter(filesInMigrationFolder, file => /\d{13,}\-.+.js$/.test(file))
+      const migrationsInFolder = _.filter(filesInMigrationFolder, file => /\d{13,}\-.+.(js|ts)$/.test(file))
         .map(filename => {
           const fileCreatedAt = parseInt(filename.split('-')[0]);
           const existsInDatabase = migrationsInDatabase.some(m => filename == m.filename);
@@ -298,7 +317,7 @@ export default class Migrator {
       const filesInMigrationFolder = fs.readdirSync(this.migrationPath);
       const migrationsInDatabase = await MigrationModel.find({});
       // Go over migrations in folder and delete any files not in DB
-      const migrationsInFolder = _.filter(filesInMigrationFolder, file => /\d{13,}\-.+.js/.test(file) )
+      const migrationsInFolder = _.filter(filesInMigrationFolder, file => /\d{13,}\-.+.(js|ts)/.test(file) )
         .map(filename => {
           const fileCreatedAt = parseInt(filename.split('-')[0]);
           const existsInDatabase = migrationsInDatabase.some(m => filename == m.filename);
@@ -379,4 +398,3 @@ function fileRequired(error) {
 
 
 module.exports = Migrator;
-

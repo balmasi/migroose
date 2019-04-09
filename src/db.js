@@ -3,7 +3,7 @@ import Promise from 'bluebird';
 // Factory function for a mongoose model
 mongoose.Promise = Promise;
 
-export default function ( collection = 'migrations', dbConnection ) {
+export default function ( collection = 'migrations', dbConnection, {typescript} ) {
 
   const MigrationSchema = new Schema({
     name: String,
@@ -27,7 +27,9 @@ export default function ( collection = 'migrations', dbConnection ) {
   });
 
   MigrationSchema.virtual('filename').get(function() {
-    return `${this.createdAt.getTime()}-${this.name}.js`;
+  	let basename = `${this.createdAt.getTime()}-${this.name}`;
+  	if(typescript) return `${basename}.ts`;
+    return `${basename}.js`;
   });
 
   dbConnection.on('error', err => {

@@ -65,6 +65,10 @@ let  { argv: args } = yargs
     type: 'boolean',
     description: 'use es6 migration template?'
   })
+	.option('typescript', {
+		type: 'boolean',
+		description: 'use typescript migration template?'
+	})
   .option('md', {
     alias: 'migrations-dir',
     description: 'The path to the migration files',
@@ -115,6 +119,7 @@ let migrator = new Migrator({
   templatePath: args['template-file'],
   dbConnectionUri: args.dbConnectionUri,
   es6Templates: args.es6,
+	typescript: args.typescript,
   collectionName:  args.collection,
   autosync: args.autosync,
   cli: true
