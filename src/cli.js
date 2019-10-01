@@ -4,6 +4,9 @@ require('colors');
 const dotenv = require('dotenv');
 const path = require('path');
 const yargs = require('yargs');
+const alias = require('module-alias');
+
+alias(path.resolve('.') + '/package.json');
 
 const Migrator = require('./lib');
 
