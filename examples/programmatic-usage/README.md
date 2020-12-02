@@ -4,7 +4,7 @@
 var migrateMongoose = require('migrate-mongoose');
 
 // Define all your variables
-var 
+var
  migrationsDir = '/path/to/migrations/',
  templatePath,
  dbUrl = 'mongodb://localhost/db',
@@ -39,8 +39,8 @@ Example return val
 
 Promise which resolves with
 [
- { name: 'my-migration', filename: '149213223424_my-migration.js', state: 'up' },
- { name: 'add-cows', filename: '149213223453_add-cows.js', state: 'down' }
+ { name: 'my-migration', filename: '149213223424_my-migration', state: 'up' },
+ { name: 'add-cows', filename: '149213223453_add-cows', state: 'down' }
 ]
 
 */
@@ -58,5 +58,3 @@ on the file system but missing in the database into the database
 This functionality is opposite of prune()
 */
 promise = migrator.sync();
-
-

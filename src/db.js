@@ -29,7 +29,7 @@ function initializeDB( collection = 'migrations', dbConnection) {
   });
 
   MigrationSchema.virtual('filename').get(function() {
-    return `${this.createdAt.getTime()}-${this.name}.js`;
+    return `${this.createdAt.getTime()}-${this.name}`;
   });
 
   dbConnection.on('error', err => {

@@ -12,6 +12,7 @@ $ ./node_modules/.bin/migrate <options> create my_new_migration
 
 where `<options>` must at a MINIMUM contain the database url (using the `-d`/`--dbConnectionUri` option).
 
+You can use custom template file for creating new migrations (using the `-t`/`--template-file` option). Migration file will be created with the same extension as template file.
 
 ##### Listing Migrations
 
@@ -69,7 +70,7 @@ $ ./node_modules/.bin/migrate <options> down add_processed_credit_cards
 
 and you'll migrate *DOWN TO (and including)* `1463003345598-add_processed_credit_cards.js`
 
-Your new state will be 
+Your new state will be
 
 ```
 UP:  	  1450107140857-user-credit-to-vault.js
@@ -85,7 +86,7 @@ DOWN:  	  1463603842010-add_default_regional_settings.js
 Lets say you `git pull` the latest changes from your project and someone had made a new migration called `add_unicorns` which adds much requested unicorns to your app.
 
 Now, when you go run any migration command (e.g. `migrate list`), you are prompted with
- 
+
 ```
 Synchronizing database with file system migrations...
 ? The following migrations exist in the migrations folder but not in the database. Select the ones you want to import into the database (Press <space> to select)
@@ -96,7 +97,7 @@ If you select it by pressing **Space** then **Enter** on your keyboard, you can 
 
 Once imported, the default state is DOWN so you'll have to `migrate up add_unicorns` to be all up-to-date.
 
-**IF ON THE OTHER HAND** you don't want this migration, simply run 
+**IF ON THE OTHER HAND** you don't want this migration, simply run
 
 ```
 $ ./node_modules/.bin/migrate prune

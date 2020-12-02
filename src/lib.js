@@ -15,7 +15,7 @@ Promise.config({
   warnings: false
 });
 
-const migrationTemplate =`/**
+const defaultTemplate = `/**
  * Make any changes you need to make to the database here
  */
 async function up () {
@@ -42,8 +42,14 @@ class Migrator {
     cli = false,
     connection
   }) {
-    const defaultTemplate = migrationTemplate;
-    this.template = templatePath ? fs.readFileSync(templatePath, 'utf-8') : defaultTemplate;
+    if (templatePath) {
+      this.template = fs.readFileSync(templatePath, 'utf-8');
+      this.templateExt = path.extname(templatePath);
+    } else {
+      this.template = defaultTemplate;
+      this.templateExt = '.js';
+    }
+
     this.migrationPath = path.resolve(migrationsPath);
     this.connection = connection || mongoose.createConnection(dbConnectionUri, { useNewUrlParser: true });
     this.collection = collectionName;
@@ -89,7 +95,7 @@ class Migrator {
 
       await this.sync();
       const now = Date.now();
-      const newMigrationFile = `${now}-${migrationName}.js`;
+      const newMigrationFile = `${now}-${migrationName}${this.templateExt}`;
       mkdirp.sync(this.migrationPath);
       fs.writeFileSync(path.join(this.migrationPath, newMigrationFile), this.template);
       // create instance in db
@@ -199,10 +205,10 @@ class Migrator {
 
   /**
    * sync file system -> database
-   * 
+   *
    * Imports any migrations that are on the file system but
    * missing in the database into the database
-   * 
+   *
    * This functionality is opposite of prune()
    */
   async sync() {
@@ -210,10 +216,11 @@ class Migrator {
       const filesInMigrationFolder = fs.readdirSync(this.migrationPath);
       const migrationsInDatabase = await MigrationModel.find({});
       // Go over migrations in folder and delete any files not in DB
-      const migrationsInFolder = _.filter(filesInMigrationFolder, file => /\d{13,}\-.+.js$/.test(file))
+      const migrationsInFolder = _.filter(filesInMigrationFolder, file => /\d{13,}\-.+$/.test(file))
         .map(filename => {
           const fileCreatedAt = parseInt(filename.split('-')[0]);
-          const existsInDatabase = migrationsInDatabase.some(m => filename == m.filename);
+          const basename = path.basename(filename, path.extname(filename));
+          const existsInDatabase = migrationsInDatabase.some(m => basename == m.filename);
           return { createdAt: fileCreatedAt, filename, existsInDatabase };
         });
 
@@ -256,7 +263,7 @@ class Migrator {
 
   /**
    * sync migration database -> file system
-   * 
+   *
    * Opposite of sync().
    * Removes files in migration directory which don't exist in database.
    */
@@ -265,7 +272,7 @@ class Migrator {
       const filesInMigrationFolder = fs.readdirSync(this.migrationPath);
       const migrationsInDatabase = await MigrationModel.find({});
       // Go over migrations in folder and delete any files not in DB
-      const migrationsInFolder = _.filter(filesInMigrationFolder, file => /\d{13,}\-.+.js/.test(file))
+      const migrationsInFolder = _.filter(filesInMigrationFolder, file => /\d{13,}\-.+/.test(file))
         .map(filename => {
           const fileCreatedAt = parseInt(filename.split('-')[0]);
           const existsInDatabase = migrationsInDatabase.some(m => filename == m.filename);
@@ -318,8 +325,8 @@ class Migrator {
    * @returns {Promise<Array<Object>>}
    * @example
    *   [
-   *    { name: 'my-migration', filename: '149213223424_my-migration.js', state: 'up' },
-   *    { name: 'add-cows', filename: '149213223453_add-cows.js', state: 'down' }
+   *    { name: 'my-migration', filename: '149213223424_my-migration', state: 'up' },
+   *    { name: 'add-cows', filename: '149213223453_add-cows', state: 'down' }
    *   ]
    */
   async list() {
@@ -346,4 +353,3 @@ function fileRequired(error) {
 
 
 module.exports = Migrator;
-
