@@ -165,6 +165,7 @@ switch (command) {
 promise
   .then(() => { process.exit(0); })
   .catch((err) => {
+    console.error(err)
     console.warn(err.message.yellow);
     process.exit(1);
   });
